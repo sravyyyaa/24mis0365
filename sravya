@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Water Distribution Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: auto; }
+        h1 { color: #2c3e50; text-align: center; }
+        .alert-box { background: #e74c3c; color: white; padding: 15px; border-radius: 5px; margin-bottom: 20px; display: none; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 5px solid #3498db; }
+        .card.danger { border-top-color: #e74c3c; background: #fdf2f2; }
+        .card h3 { margin-top: 0; color: #2c3e50; }
+        .metric { font-size: 1.2rem; margin: 8px 0; }
+        .status { font-weight: bold; }
+        .status.active { color: #2ecc71; }
+        .status.warning { color: #e67e22; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Smart Water Distribution System</h1>
+        <div id="globalAlert" class="alert-box"><strong>CRITICAL CRITICAL ALERT:</strong> System anomalies detected! Check zone pressures or low levels below 25%.</div>
+        
+        <div class="grid" id="zoneGrid"></div>
+    </div>
+
+    <script>
+        const initialZones = [
+            { id: "Zone A", level: 65, supply: 450, pressure: 3.2, time: "06:00 AM - 09:00 AM", status: "Active" },
+            { id: "Zone B", level: 18, supply: 210, pressure: 2.8, time: "07:00 AM - 10:00 AM", status: "Active" }, // Trigger Low Level Alert
+            { id: "Zone C", level: 80, supply: 600, pressure: 5.5, time: "05:00 AM - 08:00 AM", status: "Active" }, // Trigger High Pressure Alert
+            { id: "Zone D", level: 45, supply: 320, pressure: 2.1, time: "08:00 AM - 11:00 AM", status: "Active" },
+            { id: "Zone E", level: 55, supply: 410, pressure: 1.2, time: "06:30 AM - 09:30 AM", status: "Active" }  // Trigger Low Pressure Alert
+        ];
+
+        function renderDashboard(zones) {
+            const grid = document.getElementById('zoneGrid');
+            grid.innerHTML = '';
+            let triggerGlobalAlert = false;
+
+            zones.forEach(zone => {
+                const isLowLevel = zone.level < 25;
+                const isAbnormalPressure = zone.pressure < 1.5 || zone.pressure > 4.5;
+                
+                if (isLowLevel || isAbnormalPressure) {
+                    triggerGlobalAlert = true;
+                }
+
+                const card = document.createElement('div');
+                card.className = `card ${(isLowLevel || isAbnormalPressure) ? 'danger' : ''}`;
+                card.innerHTML = `
+                    <h3>${zone.id}</h3>
+                    <div class="metric">Reservoir Level: <strong>${zone.level}%</strong></div>
+                    <div class="metric">Daily Supply: <strong>${zone.supply} KL</strong></div>
+                    <div class="metric">Pressure: <strong>${zone.pressure} Bar</strong></div>
+                    <div class="metric">Timings: <small>${zone.time}</small></div>
+                    <div class="metric">Status: <span class="status ${zone.level < 25 ? 'warning' : 'active'}">${zone.status}</span></div>
+                `;
+                grid.appendChild(card);
+            });
+
+            document.getElementById('globalAlert').style.display = triggerGlobalAlert ? 'block' : 'none';
+        }
+
+        renderDashboard(initialZones);
+    </script>
+</body>
+</html>
